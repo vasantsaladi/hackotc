@@ -16,3 +16,6 @@ however, lies in a strategical betting process in which the better should bet fo
 being underlevereged (ESPN win rate % is higher than % of people betting for them).
 Question: How do we translate this process, to be applicable for market data, which is many times
 larger and much more volatile?
+
+Useful links:
+https://www.ibm.com/docs/en/spss-statistics/saas?topic=features-curve-estimation
