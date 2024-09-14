@@ -9,6 +9,7 @@ from tensorflow.keras import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.callbacks import EarlyStopping
 
+"""Data Collection"""
 # Load and prepare data
 df = pd.read_csv('market_data.csv')
 df['Date'] = pd.to_datetime(df['Date'])
@@ -60,6 +61,7 @@ X_test_reshaped = X_test.reshape(-1, X_test.shape[-1])
 X_train_scaled = scaler.fit_transform(X_train_reshaped).reshape(X_train.shape)
 X_test_scaled = scaler.transform(X_test_reshaped).reshape(X_test.shape)
 
+"""Machine learning"""
 # Build the LSTM model
 model = Sequential([
     LSTM(50, return_sequences=True, input_shape=(time_steps, len(selected_features))),
