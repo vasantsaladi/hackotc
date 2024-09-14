@@ -39,28 +39,50 @@ def calculate_macd(series):
 
 # Load and prepare data
 df = pd.read_csv('gdp.csv')
-df['Date'] = pd.to_datetime(df['Date'])
-df.set_index('Date', inplace=True)
+
+# Extract dates from the first row and set as columns
+dates = df.iloc[0, 2:]  # Dates start from the third column
+df = df.iloc[1:]  # Remove the row with dates
+print(dates)
+print(df)
+
+# Set the dates as columns
+df.columns = ['Country'] + list(dates)
+df = df.set_index('Country')
+
+# Transpose the DataFrame to have dates as rows
+df = df.T
+
+# Rename the index to 'Date'
+df.index.name = 'Date'
+
+# Convert index to datetime
+df.index = pd.to_datetime(df.index, format='%Y')
+
+# Reset index to make 'Date' a column
+df = df.reset_index()
+
+# Fill missing values with forward fill or another method
+df = df.fillna(method='ffill')
+
+# Use the GDP data for one country (choose the first country in this example)
+country = df.columns[0]
+df['GDP'] = df[country]
 
 # Calculate additional features
-df['MA5'] = df['Close'].rolling(window=5).mean()
-df['MA20'] = df['Close'].rolling(window=20).mean()
-df['RSI'] = calculate_rsi(df['Close'], window=14)
-df['MACD_Line'], df['MACD_Signal'] = calculate_macd(df['Close'])
+df['MA5'] = df['GDP'].rolling(window=5).mean()
+df['MA20'] = df['GDP'].rolling(window=20).mean()
+df['RSI'] = calculate_rsi(df['GDP'], window=14)
+df['MACD_Line'], df['MACD_Signal'] = calculate_macd(df['GDP'])
 
 # Drop rows with NaN values
 df.dropna(inplace=True)
 
 # Feature selection
-features = ['Open', 'High', 'Low', 'Close', 'Volume', 'MA5', 'MA20', 'RSI', 'MACD_Line', 'MACD_Signal']  # Add RSI & MACD
+features = ['GDP', 'MA5', 'MA20', 'RSI', 'MACD_Line', 'MACD_Signal']
 X = df[features]
-y = df['Close'].shift(-1).dropna()  # Predict next day's closing price
+y = df['GDP'].shift(-1).dropna()  # Predict next day's GDP
 X = X.loc[y.index]
-
-# Remove rows with NaN values
-df = df.dropna()
-X = X.loc[df.index]
-y = y.loc[df.index]
 
 # Select top k features
 k = 5
@@ -130,7 +152,7 @@ plt.figure(figsize=(12, 6))
 plt.plot(y_test, label='Actual')
 plt.plot(y_pred, label='Predicted')
 plt.legend()
-plt.title('Stock Price Prediction')
+plt.title('GDP Prediction')
 plt.show()
 
 # Plot training history
