@@ -1,5 +1,5 @@
 # hackotc
-jiu hackathon project
+JHU hackathon project
 
 To build a system that gathers information about countries and makes predictions on currency fluctuations based on that data using **MongoDB** for storing data and visualizing it on a web interface, you'll need to go through the following steps:
 
