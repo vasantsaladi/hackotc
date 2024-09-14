@@ -6,7 +6,10 @@ Approach: We will use Linear algebra concepts of singular-value decomposition (S
 SVD will signficantly reduce data set.
 Question: How would we create a clean model that would ensure business' ease of use?
 How do we determine the data being reduced through the SVD approach?
-Machine learning algorithm?
+
+Notes:
+SVD approach is used in weather prediction services; create matrices of dataset and simplify the matrices
+based on repeating patterns.
 
 Plan 2) 
 Approach: There is a statistical technique that can be leverged in small data sets.
@@ -14,5 +17,16 @@ ESPN March Madness betting for example, works in that people will bet for the te
 is favored to win. ESPN has their own estimates for how likely a team is to win. Consistant profit,
 however, lies in a strategical betting process in which the better should bet for the team that is 
 being underlevereged (ESPN win rate % is higher than % of people betting for them).
-Question: How do we translate this process, to be applicable for market data, which is many times
+Question:
+How do we translate this process, to be applicable for market data, which is many times
 larger and much more volatile?
+
+Notes:
+Rather than simply look at live data, we will make comparisons for how the live data
+match up with the ML predictions of; determine the underlevereged and overlevereged stock
+and reinvest accordingly to strike a balance.
+Model multiple output systems (MOS) for predictions.
+
+Useful links:
+https://www.ibm.com/docs/en/spss-statistics/saas?topic=features-curve-estimation
+https://www.mathworks.com/help/ident/ug/modeling-multiple-output-systems.html
