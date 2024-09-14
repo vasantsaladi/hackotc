@@ -42,7 +42,7 @@ def run_octave_script(script_path):
 
 # Button to run the Octave script
 if st.button('Run Octave Script'):
-    result = run_octave_script('create_forex_data.m')
+    result = run_octave_script('create_forex_gui.m')
     if result is not None:
         st.write('Processed Data:')
         st.write(result)
