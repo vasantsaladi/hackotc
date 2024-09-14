@@ -46,12 +46,16 @@ df.set_index('Date', inplace=True)
 df['MA5'] = df['Close'].rolling(window=5).mean()
 df['MA20'] = df['Close'].rolling(window=20).mean()
 df['RSI'] = calculate_rsi(df['Close'], window=14)
-df['MACD'] = calculate_macd(df['Close'])
+df['MACD_Line'], df['MACD_Signal'] = calculate_macd(df['Close'])
+
+# Drop rows with NaN values
+df.dropna(inplace=True)
 
 # Feature selection
-features = ['Open', 'High', 'Low', 'Close', 'Volume', 'MA5', 'MA20', 'RSI', 'MACD']  # Add RSI & MACD
+features = ['Open', 'High', 'Low', 'Close', 'Volume', 'MA5', 'MA20', 'RSI', 'MACD_Line', 'MACD_Signal']  # Add RSI & MACD
 X = df[features]
-y = df['Close'].shift(-1)  # Predict next day's closing price
+y = df['Close'].shift(-1).dropna()  # Predict next day's closing price
+X = X.loc[y.index]
 
 # Remove rows with NaN values
 df = df.dropna()
