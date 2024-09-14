@@ -42,6 +42,7 @@ To build a system that gathers information about countries and makes predictions
    - Use historical currency data and country-specific data to train a machine learning model that predicts whether a currency will rise or fall.
    - Algorithms to consider:
      - **Time series forecasting**: ARIMA, LSTM, or Prophet models.
+     -    We will be using LSTM
      - **Classification models**: Random Forest, Gradient Boosting, or XGBoost for predicting whether a currency will rise or fall based on country metrics.
    - You can use Python libraries like `scikit-learn`, `statsmodels`, `TensorFlow`, or `Prophet`.
 
