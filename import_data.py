@@ -6,9 +6,10 @@ import os
 # Load environment variables
 load_dotenv()
 
+
 # Get MongoDB connection string from environment variable
 mongo_uri = os.getenv('MONGO_URI')
-
+print(f"Connecting to: {mongo_uri}")
 # Connect to MongoDB
 client = MongoClient(mongo_uri)
 db = client['hackathon_db']
