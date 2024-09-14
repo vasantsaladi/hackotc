@@ -26,7 +26,7 @@ function create_forex_gui()
   % Create figure window
   f = figure('Position', [100, 100, 800, 600], 'MenuBar', 'none', 'Name', 'FOREX Data Visualization');
 
-      % Create a button for loading data
+    % Create a button for loading data
     uicontrol('Style', 'pushbutton', 'String', 'Load Data', 'Position', [10, 550, 100, 30], 'Callback', @load_data);
 
     % Create a dropdown for selecting countries
@@ -86,5 +86,8 @@ function create_forex_gui()
         xlabel('Date');
         ylabel('Rate');
         title(sprintf('FOREX Data for %s', country_name));
+
+        % Save processed data to a MAT file
+        save('processed_data.mat', 'filtered_data');
     end
 end
