@@ -1,0 +1,18 @@
+Challenge: Marshall Wace data visualization and real-time data processing
+Problem: Market data has extremely high data sizes.
+
+Plan 1)
+Approach: We will use Linear algebra concepts of singular-value decomposition (SVD) and probability (confidence intervals)
+SVD will signficantly reduce data set.
+Question: How would we create a clean model that would ensure business' ease of use?
+How do we determine the data being reduced through the SVD approach?
+Machine learning algorithm?
+
+Plan 2) 
+Approach: There is a statistical technique that can be leverged in small data sets.
+ESPN March Madness betting for example, works in that people will bet for the team they think
+is favored to win. ESPN has their own estimates for how likely a team is to win. Consistant profit,
+however, lies in a strategical betting process in which the better should bet for the team that is 
+being underlevereged (ESPN win rate % is higher than % of people betting for them).
+Question: How do we translate this process, to be applicable for market data, which is many times
+larger and much more volatile?
