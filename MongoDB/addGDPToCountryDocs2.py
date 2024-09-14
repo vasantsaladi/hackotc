@@ -1,12 +1,9 @@
-import os
-from dotenv import load_dotenv
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
+import wbgapi as wb
+from datetime import datetime
 
-# Load environment variables
-load_dotenv()
-
-uri = os.getenv("MONGO_URI")
+uri = "mongodb+srv://nagendrashivasaikanneboina:oeHZbmdmfHLvcZK5@hackotc.xbcw3.mongodb.net/?retryWrites=true&w=majority&appName=hackotc"
 client = MongoClient(uri, server_api=ServerApi('1'))
 
 # Select your database
@@ -39,10 +36,63 @@ countries = [
     "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
 ]
 
+# Indicators
+indicators = {
+    "gdp": "NY.GDP.MKTP.CD",
+    "inflation": "FP.CPI.TOTL.ZG",
+    "poverty_rate": "SI.POV.DDAY",
+    "interest_rate": "FR.INR.RINR",
+    "trade_balance": "NE.RSB.GNFS.CD",
+    "government_debt": "GC.DOD.TOTL.GD.ZS"
+}
+
+def create_country_code_mapping():
+    mapping = {}
+    for country in wb.economy.list():
+        mapping[country['name'].lower()] = country['id']
+    return mapping
+
+def fetch_data(indicator, years):
+    data = wb.data.fetch(indicator, time=years)
+    result = {}
+    for d in data:
+        economy = d['economy']
+        time = d['time']
+        value = d['value']
+        if value is not None:
+            if economy not in result:
+                result[economy] = {}
+            result[economy][time] = value
+    return result
+
 def create_country_documents():
+    current_year = datetime.now().year
+    years = list(range(current_year - 10, current_year + 1))
+
+    # Fetch data for all indicators
+    data = {key: fetch_data(indicator, years) for key, indicator in indicators.items()}
+
+    # Create country code mapping
+    country_mapping = create_country_code_mapping()
+
     for country_name in countries:
+        country_code = country_mapping.get(country_name.lower())
+        if not country_code:
+            print(f"Country code not found for {country_name}")
+            continue
+
         doc = {
-            "name": country_name
+            "name": country_name,
+            "economic_indicators": {
+                str(year): {
+                    "gdp": data["gdp"].get(country_code, {}).get(str(year)),
+                    "inflation": data["inflation"].get(country_code, {}).get(str(year)),
+                    "poverty_rate": data["poverty_rate"].get(country_code, {}).get(str(year)),
+                    "interest_rate": data["interest_rate"].get(country_code, {}).get(str(year)),
+                    "trade_balance": data["trade_balance"].get(country_code, {}).get(str(year)),
+                    "government_debt": data["government_debt"].get(country_code, {}).get(str(year))
+                } for year in years
+            }
         }
         
         result = collection.update_one(
@@ -63,6 +113,3 @@ create_country_documents()
 client.close()
 
 print("Country documents creation completed.")
-
-
-
