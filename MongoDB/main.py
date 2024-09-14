@@ -2,19 +2,18 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from pymongo import MongoClient
-import os
 
 # Set page config (This must be the first Streamlit command)
 st.set_page_config(page_title="HackOTC", layout="wide")
 
 # MongoDB connection
 # It's better to use environment variables for sensitive information
-MONGODB
+# MONGODB
 
 @st.cache_resource
 def init_connection():
     try:
-        return MongoClient(MONGODB_URI)
+        return MongoClient("mongodb+srv://cvg237:qQ72QkbuQEuXweBC@cluster0.mbtbp.mongodb.net/") # Self host for now
     except Exception as e:
         st.error(f"Failed to connect to MongoDB: {e}")
         return None
@@ -44,8 +43,8 @@ def load_data():
     if client is None:
         return pd.DataFrame()
     try:
-        db = client.hackotc  # Replace with your actual database name
-        collection = db.forex_data  # Replace with your actual collection name
+        db = client.country_gdp  # Replace with your actual database name
+        collection = db.csv  # Replace with your actual collection name
         data = list(collection.find({}, {'_id': 0}))  # Exclude MongoDB's _id field
         return pd.DataFrame(data)
     except Exception as e:
@@ -56,7 +55,9 @@ df = load_data()
 
 if df.empty:
     st.warning("No data available. Please check your database connection.")
-else:
+# The issue we're having is that we feeding it trash datasets; we need to ensure the 
+# csv file is formatted in such a way in that it falls in line with the following else statement
+"""else:
     # Sidebar
     st.sidebar.header("Country Selection")
     selected_countries = st.sidebar.multiselect(
@@ -67,7 +68,7 @@ else:
 
     # Filter data based on selection
     filtered_df = df[df['Country'].isin(selected_countries)]
-
+    
     # Main content
     col1, col2 = st.columns([1, 2])
 
@@ -103,7 +104,7 @@ else:
                          values=[country_data['Exchange Rate'], country_data['Trade Volume']],
                          title=f"{country} Metrics")
             st.plotly_chart(fig, use_container_width=True)
-
+"""
 # Footer
 st.markdown("---")
 st.markdown("HackOTC - Forex Business Intelligence Dashboard")
