@@ -3,6 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forex Business Intelligence</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Forex BI</title>
+    <link rel="stylesheet" href="style.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        .add{
+            visibility:visible;
+            opacity: 1;
+            z-index: 1000000000000000;
+        }
+        .add2{
+            visibility:visible;
+            opacity: 1;
+            z-index: 999999999999999;
+            backdrop-filter: blur(3px);
+        }
+        .stop{
+            overflow: hidden;
+        }
+        </style>
 </head>
+<body>
+    <canvas style="position: fixed; top: 0; left: 0;"></canvas>
+    <header class="header">
+        <div class="container">
+        <div class="header-main">
+        <div class="logo">
+            <h1>Forex BI</h1>
+        </div>
+        <div class="open-nav-menu">
+            <span></span>
+        </div>
+        <div class="menu-overlay">
+        </div>
+        <nav class="nav-menu">
+            <div class="close-nav-menu">
+                <a href="#">×</a>
+            </div>
+            <ul class="menu">
+                <li class="menu-item active">
+                    <a href="index.html">HOME</a>
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+    </div>
+    </header> 
+    <body>
+        <canvas style="position: fixed; top: 0; left: 0;"></canvas>
+        <header class="header">
+            <div class="container">
+            <div class="header-main">
+            <div class="logo">
+                <h1>Forex BI</h1>
+            </div>
+            <div class="open-nav-menu">
+                <span></span>
+            </div>
+            <div class="menu-overlay">
+            </div>
+            <nav class="nav-menu">
+                <div class="close-nav-menu">
+                    <a href="#">×</a>
+                </div>
+                <ul class="menu">
+                    <li class="menu-item active">
+                        <a href="index.html">HOME</a>
+                    </li>
+                    
+                </ul>
+            </nav>
+        </div>
+        </div>
+        </header> 
+    <body>
+        <section class="title">
+            <div class="home-content">
+                <table>
+                    <thead>
+                      <tr>
+                        <th>Country</th>
+                        <th>GDP</th>
+                        <th>Population</th>
+                        <th>Unemployment Rate</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr onclick="openCountryDetails('USA')">
+                        <td>USA</td>
+                        <td>$21.43 trillion</td>
+                        <td>331 million</td>
+                        <td>6.1%</td>
+                      </tr>
+                      <tr onclick="openCountryDetails('Germany')">
+                        <td>Germany</td>
+                        <td>$3.85 trillion</td>
+                        <td>83 million</td>
+                        <td>4.4%</td>
+                      </tr>
+                      <!-- Add more countries -->
+                    </tbody>
+                  </table>
+                  
+               
+                
+            </div>
+            
+            
+           
+       
+       
+     
+        </section>
+        <script src="script.js"></script>
+    
+    </body>
+<footer class="footer">
+  <div class="footer-content">
+      <p>&copy; 2024 hackotc. All rights reserved.</p>
+  </div>
+</footer>
+</html>
