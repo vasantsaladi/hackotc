@@ -38,7 +38,7 @@ def calculate_macd(series):
     return macd_line, signal_line
 
 # Load and prepare data
-df = pd.read_csv('market_data.csv')
+df = pd.read_csv('gdp.csv')
 df['Date'] = pd.to_datetime(df['Date'])
 df.set_index('Date', inplace=True)
 
