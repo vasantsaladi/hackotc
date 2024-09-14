@@ -6,6 +6,9 @@ import plotly.express as px
 from fredapi import Fred
 from dotenv import load_dotenv
 import os
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
 
 # Load environment variables
 load_dotenv()
@@ -71,40 +74,4 @@ else:
     uemp_states.index = pd.to_datetime(uemp_states.index)
 
     # Plot States Unemployment Rate
-    st.subheader("Unemployment Rate by State")
-    fig = px.line(uemp_states.reset_index(), x='index', y=uemp_states.columns)
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Bar chart for unemployment rate
-    st.subheader("Unemployment Rate by State (May 2020)")
-    if '2020-05-01' in uemp_states.index:
-        fig, ax = plt.subplots(figsize=(10, 15))
-        uemp_states.loc['2020-05-01'].sort_values().plot(kind='barh', ax=ax, width=0.7, edgecolor='black')
-        ax.set_xlabel('% Unemployed')
-        ax.legend().remove()
-        st.pyplot(fig)
-    else:
-        st.warning("Data for May 2020 not available.")
-
-    # State selector for detailed view
-    st.subheader("Detailed State View")
-    state = st.selectbox("Select a state", options=uemp_states.columns)
-
-    # Plot detailed state view
-    fig, ax = plt.subplots(figsize=(10, 5))
-    try:
-        state_data = uemp_states[state]
-        filtered_data = state_data[(state_data.index >= '2020-01-01') & (state_data.index < '2022-01-01')]
-        filtered_data.plot(ax=ax)
-        ax.set_title(f"Unemployment Rate in {state}")
-        ax.set_ylabel("Unemployment Rate (%)")
-        st.pyplot(fig)
-    except Exception as e:
-        st.error(f"An error occurred while plotting the data: {str(e)}")
-        st.write("Debug information:")
-        st.write(f"Data type of uemp_states: {type(uemp_states)}")
-        st.write(f"Columns: {uemp_states.columns}")
-        st.write(f"Index: {uemp_states.index}")
-        st.write(f"Data types of columns: {uemp_states.dtypes}")
-
-# ... (You can add more visualizations as needed)
+    st
