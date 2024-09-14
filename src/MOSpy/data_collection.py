@@ -7,9 +7,36 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
-from tensorflow.keras.callbacks import EarlyStopping
 
 """Data Collection"""
+# RSI = 100 - (100) / (1 + RS)
+def calculate_rsi(series, window=14):
+    delta = series.diff()
+    gain = delta.where(delta > 0, 0)
+    loss = -delta.where(delta < 0, 0)
+
+    avg_gain = gain.rolling(window=window, min_periods=1).mean()
+    avg_loss = loss.rolling(window=window, min_periods=1).mean()
+
+    rs = avg_gain / avg_loss
+    rsi = 100 - (100 / (1 + rs))
+
+    return rsi
+
+"""
+Compute the 12-day EMA (Exponential Moving Average) and 26-day EMA.
+Subtract the 26-day EMA from the 12-day EMA to get the MACD line.
+Compute the 9-day EMA of the MACD line to get the signal line.
+"""
+def calculate_macd(series):
+    ema_12 = series.ewm(span=12, adjust=False).mean()
+    ema_26 = series.ewm(span=26, adjust=False).mean()
+
+    macd_line = ema_12 - ema_26
+    signal_line = macd_line.ewm(span=9, adjust=False).mean()
+
+    return macd_line, signal_line
+
 # Load and prepare data
 df = pd.read_csv('market_data.csv')
 df['Date'] = pd.to_datetime(df['Date'])
@@ -18,11 +45,11 @@ df.set_index('Date', inplace=True)
 # Calculate additional features
 df['MA5'] = df['Close'].rolling(window=5).mean()
 df['MA20'] = df['Close'].rolling(window=20).mean()
-# df['RSI'] = calculate_rsi(df['Close'], window=14)  # Implement this function
-# df['MACD'] = calculate_macd(df['Close'])  # Implement this function
+df['RSI'] = calculate_rsi(df['Close'], window=14)
+df['MACD'] = calculate_macd(df['Close'])
 
 # Feature selection
-features = ['Open', 'High', 'Low', 'Close', 'Volume', 'MA5', 'MA20']  # Add RSI & MACD
+features = ['Open', 'High', 'Low', 'Close', 'Volume', 'MA5', 'MA20', 'RSI', 'MACD']  # Add RSI & MACD
 X = df[features]
 y = df['Close'].shift(-1)  # Predict next day's closing price
 
@@ -79,7 +106,6 @@ history = model.fit(
     epochs=50,
     batch_size=32,
     validation_split=0.2,
-    callbacks=[EarlyStopping(patience=10, restore_best_weights=True)],
     verbose=1
 )
 
@@ -96,7 +122,7 @@ print(f"Root Mean Squared Error: {rmse}")
 print(f"Mean Absolute Error: {mae}")
 
 # Plot actual vs predicted prices
-plt.figure(figsize=(12,6))
+plt.figure(figsize=(12, 6))
 plt.plot(y_test, label='Actual')
 plt.plot(y_pred, label='Predicted')
 plt.legend()
@@ -104,7 +130,7 @@ plt.title('Stock Price Prediction')
 plt.show()
 
 # Plot training history
-plt.figure(figsize=(12,6))
+plt.figure(figsize=(12, 6))
 plt.plot(history.history['loss'], label='Training Loss')
 plt.plot(history.history['val_loss'], label='Validation Loss')
 plt.legend()
@@ -124,13 +150,13 @@ balance = initial_balance
 shares = 0
 
 for i in range(1, len(y_test)):
-    if y_pred[i] > y_test[i-1]:  # If we predict price will go up
+    if y_pred[i] > y_test[i - 1]:  # If we predict price will go up
         if shares == 0:  # Buy if we don't have shares
-            shares = balance // y_test[i-1]
-            balance -= shares * y_test[i-1]
-    elif y_pred[i] < y_test[i-1]:  # If we predict price will go down
+            shares = balance // y_test[i - 1]
+            balance -= shares * y_test[i - 1]
+    elif y_pred[i] < y_test[i - 1]:  # If we predict price will go down
         if shares > 0:  # Sell if we have shares
-            balance += shares * y_test[i-1]
+            balance += shares * y_test[i - 1]
             shares = 0
 
 # Final valuation
