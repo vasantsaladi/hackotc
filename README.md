@@ -66,3 +66,6 @@ To build a system that gathers information about countries and makes predictions
 
 ### Next Steps:
 Would you like help with setting up any specific part, like collecting data or building the machine learning model?
+
+### Presentation:
+https://new.express.adobe.com/id/urn:aaid:sc:VA6C2:5a4792e7-2db5-5496-a8cc-77beae1695e8?invite=true&promoid=Z2G1FQKR&mv=other
