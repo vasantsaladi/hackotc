@@ -11,52 +11,31 @@ To build a system that gathers information about countries and makes predictions
    - **News APIs** (for sentiment analysis, which can influence currency movements).
 
 ### 2. **FRED data API**:
-   - Set up a **MongoDB** database for storing all data collected from APIs.
-   - Create collections for different data types (e.g., `currencies`, `economics`, `news`).
-   - Example collections:
-     ```json
-     {
-       "currency": "USD",
-       "date": "2023-09-01",
-       "rate": 1.23,
-       "country": "USA"
-     }
-     ```
-     ```json
-     {
-       "country": "USA",
-       "gdp": 21000000,
-       "inflation": 2.1,
-       "interest_rate": 1.5,
-       "date": "2023-09-01"
-     }
-     ```
+   - FRED has up to date economical data
+   - Use the datasets and generate a .csv file of it
+      - The .csv file will be used as an input for the LSTM ML model (see step 4)
 
 ### 3. **Preprocessing and Cleaning Data**:
    Clean and preprocess the data to ensure it's ready for analysis. We will use Python `pandas` to handle this process:
    - Normalize currency data to account for time zones or missing data.
    - Normalize country-specific data.
    - Data handled by FRED API with timestamps and labels to allow easy querying.
+   - Singular value decomposition to simplify the dataset to be smaller and more manageable.
 
 ### 4. **Develop a Machine Learning Model**:
    - Use historical currency data and country-specific data to train a machine learning model that predicts whether a currency will rise or fall.
    - Algorithms to consider:
      - **Time series forecasting**: ARIMA, LSTM, or Prophet models.
-     -    We will be using LSTM
+        - We will be using LSTM
      - **Classification models**: Random Forest, Gradient Boosting, or XGBoost for predicting whether a currency will rise or fall based on country metrics.
-   - You can use Python libraries like `scikit-learn`, `statsmodels`, `TensorFlow`, or `Prophet`.
+   - `scikit-learn` & `TensorFlow` will be used.
 
-### 5. **API Integration with MongoDB**:
-   Build scripts to fetch and store data in MongoDB automatically:
-   - Schedule data fetching using cron jobs or a task scheduler (such as **celery** with **Redis**).
-   - Insert or update records in MongoDB as new data comes in.
+### 5. **MATLAB scripts**:
+   Build script based on new .csv generated post step 4:
+   - create_forex_gui.csv
 
 ### 6. **Visualizing Data on a Website**:
-   - **Frontend**: Use **HTML/CSS/JavaScript** (or **React** for more dynamic web pages) to visualize data.
-   - **Backend**: Use **Node.js** or **Flask/Django** to connect MongoDB and the frontend. Use `mongoose` or `pymongo` to fetch data from MongoDB and pass it to the frontend.
-   - **Visualization Libraries**: Use libraries like:
-     - **Chart.js** or **D3.js** for graphing currency trends.
-     - **Plotly** for interactive charts and dashboards.
+   - Streamlit can be used for easy backend development and simple frontend
    - Example: Display historical exchange rate trends over time and allow users to select countries and view forecasts for the currency.
 
 ### 7. **Scoring & Prediction System**:
@@ -76,15 +55,14 @@ To build a system that gathers information about countries and makes predictions
 
 ### 8. **Deploy the Web Application**:
    - Use cloud services like **Heroku**, **AWS**, or **Azure** to deploy your website.
-   - MongoDB can be hosted on services like **MongoDB Atlas**.
    - Set up CI/CD pipelines for continuous deployment and testing.
 
 ### Stack Summary:
 - **Frontend**: React or Vanilla JavaScript + Chart.js / D3.js for visualizing data.
-- **Backend**: Node.js with Express or Python (Flask/Django) for handling the API and fetching data from MongoDB.
-- **Database**: MongoDB for storing and querying economic and financial data.
-- **Data Sources**: APIs like Alpha Vantage, World Bank, IMF, news sentiment APIs.
+- **Backend**: Streamlit.
+- **Database**: FRED for storing and querying economic and financial data.
+- **Data Sources**: FRED, Alpha Vantage, World Bank, IMF, news sentiment APIs.
 - **ML Frameworks**: scikit-learn, TensorFlow, statsmodels (ARIMA/Prophet) for predictions.
 
 ### Next Steps:
-Would you like help with setting up any specific part, like collecting data, building the machine learning model, or setting up the MongoDB integration?
+Would you like help with setting up any specific part, like collecting data or building the machine learning model?
