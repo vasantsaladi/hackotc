@@ -30,6 +30,9 @@ def create_sequences(data, seq_length):
 
 seq_length = 5
 X, y = create_sequences(scaled_data, seq_length)
+y = y.reshape(y.shape[0], y.shape[1], 1)
+#print("X shape: ", X.shape)
+#print("Y shape: ", y.shape)
 
 # Split data into train and test sets
 train_size = int(len(X) * 0.8)
