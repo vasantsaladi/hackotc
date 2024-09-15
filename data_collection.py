@@ -40,51 +40,42 @@ def calculate_macd(series):
 # Load and prepare data
 df = pd.read_csv('data/wbgdp.csv')
 
-# Extract dates from the first row and set as columns
-dates = df.iloc[0, 2:]  # Dates start from the third column
-df = df.iloc[1:]  # Remove the row with dates
+# Clean the data: Replace '..' with NaN and convert to numeric where possible
+df.replace('..', np.nan, inplace=True)
+df = df.apply(pd.to_numeric, errors='ignore')
 
-# Set the dates as columns
-df.columns = list(dates)
-df = df.set_index('Country')
-
-# Transpose the DataFrame to have dates as rows
-df = df.T
-
-# Rename the index to 'Date'
-df.index.name = 'Date'
-
-# Convert index to datetime
-df.index = pd.to_datetime(df.index, format='%Y')
-
-# Reset index to make 'Date' a column
-df = df.reset_index()
-
-# Fill missing values with forward fill or another method
-df = df.fillna(method='ffill')
-
-# Use the GDP data for one country (choose the first country in this example)
-country = df.columns[1]
-df['GDP'] = df[country]
-
-# Calculate additional features
-df['MA5'] = df['GDP'].rolling(window=5).mean()
-df['MA20'] = df['GDP'].rolling(window=20).mean()
-df['RSI'] = calculate_rsi(df['GDP'], window=14)
-df['MACD_Line'], df['MACD_Signal'] = calculate_macd(df['GDP'])
-
-# Drop rows with NaN values
+# Remove rows with NaN values (you might want to handle this differently depending on your analysis)
 df.dropna(inplace=True)
 
-# Feature selection
-features = ['GDP', 'MA5', 'MA20', 'RSI', 'MACD_Line', 'MACD_Signal']
-X = df[features]
-y = df['GDP'].shift(-1).dropna()  # Predict next day's GDP
-X = X.loc[y.index]
+# The CSV does not contain a 'Date' column, so we won't set an index
+# Ensure to select columns that are relevant for the task; assuming 'Country Name' and 'Country Code' are not useful for feature engineering.
 
-# Select top k features
+# Example: Using GDP from 2014 for features (you can adjust based on your requirements)
+df['GDP_2014'] = df['2014']  # Add more columns as needed for features
+
+# Example feature engineering based on available data
+# Here we'll use 'GDP_2014' as a placeholder. Adjust as necessary.
+df['MA5'] = df['GDP_2014'].rolling(window=5).mean()
+df['MA20'] = df['GDP_2014'].rolling(window=20).mean()
+df['RSI'] = calculate_rsi(df['GDP_2014'], window=14)
+macd_line, signal_line = calculate_macd(df['GDP_2014'])
+df['MACD'] = macd_line
+
+# Remove rows with NaN values after feature engineering
+df.dropna(inplace=True)
+
+# Prepare features and target variable
+features = ['GDP_2014', 'MA5', 'MA20', 'RSI', 'MACD']  # Add RSI & MACD
+X = df[features]
+y = df['GDP_2014'].shift(-1)  # Predict next year's GDP; adjust as needed
+
+# Remove rows with NaN values in target
+df.dropna(subset=['GDP_2014'], inplace=True)
+X = X.loc[df.index]
+y = y.loc[df.index]
+
+# Feature selection
 k = 5
-# X and y must be aligned and contain no NaNs
 selector = SelectKBest(score_func=f_regression, k=k)
 X_selected = selector.fit_transform(X, y)
 selected_features = X.columns[selector.get_support()].tolist()
@@ -99,7 +90,7 @@ def create_sequences(X, y, time_steps=1):
         ys.append(y.iloc[i + time_steps])
     return np.array(Xs), np.array(ys)
 
-time_steps = 60  # Use 60 days of historical data to predict the next day
+time_steps = 60  # Use 60 periods of historical data to predict the next period
 X_seq, y_seq = create_sequences(X[selected_features], y, time_steps)
 
 # Split the data
