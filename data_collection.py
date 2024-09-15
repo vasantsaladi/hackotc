@@ -8,9 +8,8 @@ from tensorflow.keras.layers import LSTM, Dense
 # Read the CSV file
 df = pd.read_csv('data/wbgdp.csv', index_col='Country Name')
 
-"""Maybe we can embed this into streamlit or create gui for?"""
-# Select a specific country for analysis (e.g., 'Aruba')
-country_data = df.loc['Afghanistan'].dropna()
+# Select a specific country for analysis (e.g., 'Germany')
+country_data = df.loc['Germany'].dropna()
 
 # Convert year columns to numeric and drop non-numeric columns
 year_columns = [col for col in country_data.index if col.isdigit()]
