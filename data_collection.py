@@ -57,7 +57,7 @@ train_predict = scaler.inverse_transform(train_predict)
 y_train = scaler.inverse_transform(y_train)
 test_predict = scaler.inverse_transform(test_predict)
 y_test = scaler.inverse_transform(y_test)
-
+"""
 # Create a plot
 # We will make y 3-dimensional
 y = y.reshape(y.shape[0], y.shape[1], 1)
@@ -71,7 +71,7 @@ plt.ylabel('Value')
 plt.legend()
 plt.savefig('lstm_prediction_plot.png')
 plt.close()
-
+"""
 # Create a new CSV file with predictions
 results_df = pd.DataFrame({
     'Year': year_columns[seq_length:],
