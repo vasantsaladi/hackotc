@@ -47,9 +47,7 @@ df = df.apply(pd.to_numeric, errors='ignore')
 # Remove rows with NaN values (you might want to handle this differently depending on your analysis)
 df.dropna(inplace=True)
 
-# The CSV does not contain a 'Date' column, so we won't set an index
 # Ensure to select columns that are relevant for the task; assuming 'Country Name' and 'Country Code' are not useful for feature engineering.
-
 # Example: Using GDP from 2014 for features (you can adjust based on your requirements)
 df['GDP_2014'] = df['2014']  # Add more columns as needed for features
 
@@ -62,7 +60,7 @@ macd_line, signal_line = calculate_macd(df['GDP_2014'])
 df['MACD'] = macd_line
 
 # Remove rows with NaN values after feature engineering
-df.dropna(inplace=True)
+# df.dropna(inplace=True)
 
 # Prepare features and target variable
 features = ['GDP_2014', 'MA5', 'MA20', 'RSI', 'MACD']  # Add RSI & MACD
