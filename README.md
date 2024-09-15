@@ -11,8 +11,8 @@ To build a system that gathers information about countries and makes predictions
    - **News APIs** (for sentiment analysis, which can influence currency movements).
 
 ### 2. **FRED data API**:
-   - FRED has up to date economical data
-   - Use the datasets and generate a .csv file of it
+   - FRED & world bank has up to date economical data
+   - Save the datasets as a .csv file
       - The .csv file will be used as an input for the LSTM ML model (see step 4)
 
 ### 3. **Preprocessing and Cleaning Data**:
@@ -20,7 +20,7 @@ To build a system that gathers information about countries and makes predictions
    - Normalize currency data to account for time zones or missing data.
    - Normalize country-specific data.
    - Data handled by FRED API with timestamps and labels to allow easy querying.
-   - Singular value decomposition to simplify the dataset to be smaller and more manageable.
+   - Possibly use singular value decomposition to simplify the dataset to be smaller and more manageable.
 
 ### 4. **Develop a Machine Learning Model**:
    - Use historical currency data and country-specific data to train a machine learning model that predicts whether a currency will rise or fall.
@@ -28,7 +28,7 @@ To build a system that gathers information about countries and makes predictions
      - **Time series forecasting**: ARIMA, LSTM, or Prophet models.
         - We will be using LSTM
      - **Classification models**: Random Forest, Gradient Boosting, or XGBoost for predicting whether a currency will rise or fall based on country metrics.
-   - `scikit-learn` & `TensorFlow` will be used.
+   - `TensorFlow` will be used.
 
 ### 5. **MATLAB scripts**:
    Build script based on new .csv generated post step 4:
