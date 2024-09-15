@@ -1,0 +1,80 @@
+import os
+import streamlit as st
+from openai import OpenAI
+from dotenv import load_dotenv
+
+# Retrieve your OpenAI API key
+working_dir = os.path.dirname(os.path.abspath(__file__))
+dotenv_path = os.path.join(working_dir, ".env")
+load_dotenv(dotenv_path)
+OpenAI.api_key = os.getenv("OPENAI_API_KEY")
+
+# Load the product data from the CSV file
+with open("wbgdp.csv") as file:
+    product_data = file.read()
+
+# Initialize the context with interaction rules and product data
+context = []
+
+# Define the chatbot's interaction rules
+systemPrompt = ("""
+You are an advanced chatbot designed to assist users with insights and predictions about global economic conditions. 
+Your primary function is to provide quick, accurate responses based on the information available in your RAG (Retrieval-Augmented Generation) Knowledge Base. 
+This knowledge base contains data on various countries and key economic indicators such as poverty rate, unemployment, GDP, and overall economic conditions.
+
+Your responsibilities include:
+
+1. Answering Questions: Respond to user inquiries about economic indicators and conditions of different countries. Provide relevant information about poverty rates, unemployment statistics, GDP, and other economic metrics.
+2. Predicting Economic Disasters: Use the available data to help predict potential economic disasters. Analyze current trends and indicators to assess the likelihood of drastic economic issues in specific countries.
+3. Providing Contextual Insights: Offer insights into how various economic indicators interact and impact each other, and explain the implications of these interactions for predicting economic stability or disaster.
+4. Navigating Data: Efficiently search through the RAG Knowledge Base to retrieve the most relevant information for user queries. Ensure that responses are based on up-to-date and accurate data.
+5. User Interaction: Engage with users in a conversational manner, providing clear and concise answers. If a query is beyond your current data scope, politely inform the user and suggest alternative ways to obtain the needed information.
+
+NOTE: whenever the value is 1 it means the value of that countries gdp at the specified year is not provided in our dataset
+
+Example User Queries:
+- "What is the current unemployment rate in Brazil?"
+- "Can you predict if India might face an economic crisis soon?"
+- "How does the poverty rate in Nigeria compare to its GDP growth?" 
+""" + product_data
+)
+
+context.append({'role': 'system', 'content': systemPrompt})
+
+# Function to fetch messages from the OpenAI Chat model
+def fetch_messages(messages, model="gpt-4o", temperature=0):
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    response = client.chat.completions.create(
+        model=model,
+        messages=messages,
+        temperature=temperature,
+    )
+    return response.choices[0].message.content
+
+# Function to refresh and update the conversation context based on user input
+def refresh_conversation(chat):
+    context.append({'role': 'user', 'content': chat})
+    response = fetch_messages(context, temperature=0.7)
+    context.append({'role': 'assistant', 'content': response})
+    return response
+
+# Streamlit front-end interface
+def main():
+    st.title("Economic Insight Chatbot")
+    
+    st.write("Ask any questions about global economic conditions, such as GDP, for different countries based on our Dataset.")
+    
+    user_input = st.text_input("Enter your question:")
+    
+    if st.button("Submit"):
+        if user_input:
+            # Get the chatbot's response
+            bot_response = refresh_conversation(user_input)
+            
+            # Display the chatbot's response
+            st.write(f"**Chatbot Response:** {bot_response}")
+        else:
+            st.write("Please enter a message.")
+
+if __name__ == '__main__':
+    main()
