@@ -27,6 +27,9 @@ match up with the ML predictions of; determine the underlevereged and overlevere
 and reinvest accordingly to strike a balance.
 Model multiple output systems (MOS) for predictions.
 
+Current goals:
+Improve backend
+
 Useful links:
 https://www.ibm.com/docs/en/spss-statistics/saas?topic=features-curve-estimation
 https://www.mathworks.com/help/ident/ug/modeling-multiple-output-systems.html
