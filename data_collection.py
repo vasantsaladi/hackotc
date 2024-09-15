@@ -1,181 +1,76 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.feature_selection import SelectKBest, f_regression
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import mean_squared_error, mean_absolute_error
-from tensorflow.keras import Sequential
-from tensorflow.keras.layers import LSTM, Dense, Dropout
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense
 
-"""Data Collection"""
-# RSI = 100 - (100) / (1 + RS)
-def calculate_rsi(series, window=14):
-    delta = series.diff()
-    gain = delta.where(delta > 0, 0)
-    loss = -delta.where(delta < 0, 0)
+# Read the CSV file
+df = pd.read_csv('data/wbgdp.csv', index_col='Country Name')
 
-    avg_gain = gain.rolling(window=window, min_periods=1).mean()
-    avg_loss = loss.rolling(window=window, min_periods=1).mean()
+# Select a specific country for analysis (e.g., 'Aruba')
+country_data = df.loc['Aruba'].dropna()
 
-    rs = avg_gain / avg_loss
-    rsi = 100 - (100 / (1 + rs))
+# Convert year columns to numeric and drop non-numeric columns
+year_columns = [col for col in country_data.index if col.isdigit()]
+data = country_data[year_columns].astype(float).values.reshape(-1, 1)
 
-    return rsi
-
-"""
-Compute the 12-day EMA (Exponential Moving Average) and 26-day EMA.
-Subtract the 26-day EMA from the 12-day EMA to get the MACD line.
-Compute the 9-day EMA of the MACD line to get the signal line.
-"""
-def calculate_macd(series):
-    ema_12 = series.ewm(span=12, adjust=False).mean()
-    ema_26 = series.ewm(span=26, adjust=False).mean()
-
-    macd_line = ema_12 - ema_26
-    signal_line = macd_line.ewm(span=9, adjust=False).mean()
-
-    return macd_line, signal_line
-
-# Load and prepare data
-df = pd.read_csv('data/wbgdp.csv')
-
-# Clean the data: Replace '..' with NaN and convert to numeric where possible
-df.replace('..', np.nan, inplace=True)
-df = df.apply(pd.to_numeric, errors='ignore')
-
-# Remove rows with NaN values (you might want to handle this differently depending on your analysis)
-df.dropna(inplace=True)
-
-# Ensure to select columns that are relevant for the task; assuming 'Country Name' and 'Country Code' are not useful for feature engineering.
-# Example: Using GDP from 2014 for features (you can adjust based on your requirements)
-df['GDP_2014'] = df['2014']  # Add more columns as needed for features
-
-# Example feature engineering based on available data
-# Here we'll use 'GDP_2014' as a placeholder. Adjust as necessary.
-df['MA5'] = df['GDP_2014'].rolling(window=5).mean()
-df['MA20'] = df['GDP_2014'].rolling(window=20).mean()
-df['RSI'] = calculate_rsi(df['GDP_2014'], window=14)
-macd_line, signal_line = calculate_macd(df['GDP_2014'])
-df['MACD'] = macd_line
-
-# Remove rows with NaN values after feature engineering
-# df.dropna(inplace=True)
-
-# Prepare features and target variable
-features = ['GDP_2014', 'MA5', 'MA20', 'RSI', 'MACD']  # Add RSI & MACD
-X = df[features]
-y = df['GDP_2014'].shift(-1)  # Predict next year's GDP; adjust as needed
-
-# Remove rows with NaN values in target
-df.dropna(subset=['GDP_2014'], inplace=True)
-X = X.loc[df.index]
-y = y.loc[df.index]
-
-# Feature selection
-k = 5
-selector = SelectKBest(score_func=f_regression, k=k)
-X_selected = selector.fit_transform(X, y)
-selected_features = X.columns[selector.get_support()].tolist()
-
-print(f"Selected features: {selected_features}")
+# Normalize the data
+scaler = MinMaxScaler(feature_range=(0, 1))
+scaled_data = scaler.fit_transform(data)
 
 # Prepare data for LSTM
-def create_sequences(X, y, time_steps=1):
-    Xs, ys = [], []
-    for i in range(len(X) - time_steps):
-        Xs.append(X.iloc[i:(i + time_steps)].values)
-        ys.append(y.iloc[i + time_steps])
-    return np.array(Xs), np.array(ys)
+def create_sequences(data, seq_length):
+    X, y = [], []
+    for i in range(len(data) - seq_length):
+        X.append(data[i:i+seq_length])
+        y.append(data[i+seq_length])
+    return np.array(X), np.array(y)
 
-time_steps = 60  # Use 60 periods of historical data to predict the next period
-X_seq, y_seq = create_sequences(X[selected_features], y, time_steps)
+seq_length = 5
+X, y = create_sequences(scaled_data, seq_length)
 
-# Split the data
-X_train, X_test, y_train, y_test = train_test_split(X_seq, y_seq, test_size=0.2, shuffle=False)
+# Split data into train and test sets
+train_size = int(len(X) * 0.8)
+X_train, X_test = X[:train_size], X[train_size:]
+y_train, y_test = y[:train_size], y[train_size:]
 
-# Scale the features
-scaler = StandardScaler()
-X_train_reshaped = X_train.reshape(-1, X_train.shape[-1])
-X_test_reshaped = X_test.reshape(-1, X_test.shape[-1])
-X_train_scaled = scaler.fit_transform(X_train_reshaped).reshape(X_train.shape)
-X_test_scaled = scaler.transform(X_test_reshaped).reshape(X_test.shape)
-
-"""Machine learning"""
-# Build the LSTM model
+# Build LSTM model
 model = Sequential([
-    LSTM(50, return_sequences=True, input_shape=(time_steps, len(selected_features))),
-    Dropout(0.2),
-    LSTM(50, return_sequences=False),
-    Dropout(0.2),
+    LSTM(50, activation='relu', input_shape=(seq_length, 1)),
     Dense(1)
 ])
-
-model.compile(optimizer='adam', loss='mean_squared_error')
+model.compile(optimizer='adam', loss='mse')
 
 # Train the model
-history = model.fit(
-    X_train_scaled, y_train,
-    epochs=50,
-    batch_size=32,
-    validation_split=0.2,
-    verbose=1
-)
+model.fit(X_train, y_train, epochs=100, batch_size=32, validation_split=0.1, verbose=0)
 
 # Make predictions
-y_pred = model.predict(X_test_scaled)
+train_predict = model.predict(X_train)
+test_predict = model.predict(X_test)
 
-# Calculate error metrics
-mse = mean_squared_error(y_test, y_pred)
-rmse = np.sqrt(mse)
-mae = mean_absolute_error(y_test, y_pred)
+# Inverse transform predictions
+train_predict = scaler.inverse_transform(train_predict)
+y_train = scaler.inverse_transform(y_train)
+test_predict = scaler.inverse_transform(test_predict)
+y_test = scaler.inverse_transform(y_test)
 
-print(f"Mean Squared Error: {mse}")
-print(f"Root Mean Squared Error: {rmse}")
-print(f"Mean Absolute Error: {mae}")
-
-# Plot actual vs predicted prices
+# Create a plot
 plt.figure(figsize=(12, 6))
-plt.plot(y_test, label='Actual')
-plt.plot(y_pred, label='Predicted')
+plt.plot(year_columns[seq_length:], scaler.inverse_transform(scaled_data[seq_length:]), label='Actual')
+plt.plot(year_columns[seq_length:train_size], train_predict, label='Train Predict')
+plt.plot(year_columns[train_size+seq_length:], test_predict, label='Test Predict')
+plt.title('LSTM Time Series Prediction for Aruba')
+plt.xlabel('Year')
+plt.ylabel('Value')
 plt.legend()
-plt.title('GDP Prediction')
-plt.show()
+plt.savefig('lstm_prediction_plot.png')
+plt.close()
 
-# Plot training history
-plt.figure(figsize=(12, 6))
-plt.plot(history.history['loss'], label='Training Loss')
-plt.plot(history.history['val_loss'], label='Validation Loss')
-plt.legend()
-plt.title('Model Training History')
-plt.show()
-
-# Evaluate directional accuracy
-def directional_accuracy(y_true, y_pred):
-    return np.mean((y_true[1:] > y_true[:-1]) == (y_pred[1:] > y_pred[:-1]))
-
-dir_acc = directional_accuracy(y_test, y_pred)
-print(f"Directional Accuracy: {dir_acc:.2f}")
-
-# Backtesting (simple example)
-initial_balance = 10000
-balance = initial_balance
-shares = 0
-
-for i in range(1, len(y_test)):
-    if y_pred[i] > y_test[i - 1]:  # If we predict price will go up
-        if shares == 0:  # Buy if we don't have shares
-            shares = balance // y_test[i - 1]
-            balance -= shares * y_test[i - 1]
-    elif y_pred[i] < y_test[i - 1]:  # If we predict price will go down
-        if shares > 0:  # Sell if we have shares
-            balance += shares * y_test[i - 1]
-            shares = 0
-
-# Final valuation
-final_balance = balance + shares * y_test[-1]
-returns = (final_balance - initial_balance) / initial_balance * 100
-
-print(f"Initial balance: ${initial_balance}")
-print(f"Final balance: ${final_balance:.2f}")
-print(f"Return: {returns:.2f}%")
+# Create a new CSV file with predictions
+results_df = pd.DataFrame({
+    'Year': year_columns[seq_length:],
+    'Actual': scaler.inverse_transform(scaled_data[seq_length:]).flatten(),
+    'Predicted': np.concatenate([train_predict.flatten(), test_predict.flatten()])
+})
+results_df.to_csv('lstm_predictions.csv', index=False)
