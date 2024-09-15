@@ -42,12 +42,10 @@ df = pd.read_csv('data/wbgdp.csv')
 
 # Extract dates from the first row and set as columns
 dates = df.iloc[0, 2:]  # Dates start from the third column
-# df = df.iloc[1:]  # Remove the row with dates
-print(dates)
-print(df)
+df = df.iloc[1:]  # Remove the row with dates
 
 # Set the dates as columns
-df.columns = ['Country'] + list(dates)
+df.columns = list(dates)
 df = df.set_index('Country')
 
 # Transpose the DataFrame to have dates as rows
