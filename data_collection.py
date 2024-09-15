@@ -38,10 +38,13 @@ def calculate_macd(series):
     return macd_line, signal_line
 
 # Load and prepare data
-df = pd.read_csv('gdp.csv', usecols=range(64))
+df = pd.read_csv('data/wbgdp.csv')
 
 # Extract dates from the first row and set as columns
 dates = df.iloc[0, 2:]  # Dates start from the third column
+# df = df.iloc[1:]  # Remove the row with dates
+print(dates)
+print(df)
 
 # Set the dates as columns
 df.columns = ['Country'] + list(dates)
@@ -63,7 +66,7 @@ df = df.reset_index()
 df = df.fillna(method='ffill')
 
 # Use the GDP data for one country (choose the first country in this example)
-country = df.columns[0]
+country = df.columns[1]
 df['GDP'] = df[country]
 
 # Calculate additional features
@@ -174,11 +177,11 @@ shares = 0
 
 for i in range(1, len(y_test)):
     if y_pred[i] > y_test[i - 1]:  # If we predict price will go up
-        if shares == 0:  # Need to buy
+        if shares == 0:  # Buy if we don't have shares
             shares = balance // y_test[i - 1]
             balance -= shares * y_test[i - 1]
     elif y_pred[i] < y_test[i - 1]:  # If we predict price will go down
-        if shares > 0:  # Need to sell
+        if shares > 0:  # Sell if we have shares
             balance += shares * y_test[i - 1]
             shares = 0
 
