@@ -30,7 +30,6 @@ def create_sequences(data, seq_length):
 
 seq_length = 5
 X, y = create_sequences(scaled_data, seq_length)
-y = y.reshape(y.shape[0], y.shape[1], 1)
 #print("X shape: ", X.shape)
 #print("Y shape: ", y.shape)
 
@@ -60,6 +59,8 @@ test_predict = scaler.inverse_transform(test_predict)
 y_test = scaler.inverse_transform(y_test)
 
 # Create a plot
+# We will make y 3-dimensional
+y = y.reshape(y.shape[0], y.shape[1], 1)
 plt.figure(figsize=(12, 6))
 plt.plot(year_columns[seq_length:], scaler.inverse_transform(scaled_data[seq_length:]), label='Actual')
 plt.plot(year_columns[seq_length:train_size], train_predict, label='Train Predict')
