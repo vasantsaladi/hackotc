@@ -8,8 +8,9 @@ from tensorflow.keras.layers import LSTM, Dense
 # Read the CSV file
 df = pd.read_csv('data/wbgdp.csv', index_col='Country Name')
 
+"""Maybe we can embed this into streamlit or create gui for?"""
 # Select a specific country for analysis (e.g., 'Aruba')
-country_data = df.loc['Aruba'].dropna()
+country_data = df.loc['Afghanistan'].dropna()
 
 # Convert year columns to numeric and drop non-numeric columns
 year_columns = [col for col in country_data.index if col.isdigit()]
@@ -60,7 +61,7 @@ plt.figure(figsize=(12, 6))
 plt.plot(year_columns[seq_length:], scaler.inverse_transform(scaled_data[seq_length:]), label='Actual')
 plt.plot(year_columns[seq_length:train_size], train_predict, label='Train Predict')
 plt.plot(year_columns[train_size+seq_length:], test_predict, label='Test Predict')
-plt.title('LSTM Time Series Prediction for Aruba')
+plt.title('LSTM Time Series Prediction for Afghanistan')
 plt.xlabel('Year')
 plt.ylabel('Value')
 plt.legend()
